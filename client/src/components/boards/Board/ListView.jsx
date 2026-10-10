@@ -58,7 +58,7 @@ const ListView = React.memo(
         {canAddCard &&
           (onCardCreate && isAddCardOpened ? (
             <div className={styles.segment}>
-              <AddCard onCreate={onCardCreate} onClose={handleAddCardClose} />
+              <AddCard draftKey="board-list" onCreate={onCardCreate} onClose={handleAddCardClose} />
             </div>
           ) : (
             <div className={styles.addCardButtonWrapper}>

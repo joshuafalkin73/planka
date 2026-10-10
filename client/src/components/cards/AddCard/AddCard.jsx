@@ -25,7 +25,39 @@ const DEFAULT_DATA = {
   name: '',
 };
 
-const AddCard = React.memo(({ isOpened, className, onCreate, onClose }) => {
+const DRAFT_PREFIX = 'planka-add-card-draft:';
+const draftCache = new Map();
+
+const loadDraft = (key) => {
+  if (!key) return null;
+  if (draftCache.has(key)) return draftCache.get(key);
+  try {
+    const raw = window.sessionStorage.getItem(DRAFT_PREFIX + key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveDraft = (key, draft) => {
+  if (!key) return;
+  if (draft && draft.name) {
+    draftCache.set(key, draft);
+  } else {
+    draftCache.delete(key);
+  }
+  try {
+    if (draft && draft.name) {
+      window.sessionStorage.setItem(DRAFT_PREFIX + key, JSON.stringify(draft));
+    } else {
+      window.sessionStorage.removeItem(DRAFT_PREFIX + key);
+    }
+  } catch {
+    // storage unavailable; in-memory cache still covers remount
+  }
+};
+
+const AddCard = React.memo(({ isOpened, className, draftKey, onCreate, onClose }) => {
   const { defaultCardType: defaultType, limitCardTypesToDefaultOne: limitTypesToDefaultOne } =
     useSelector(selectors.selectCurrentBoard);
 
@@ -35,7 +67,13 @@ const AddCard = React.memo(({ isOpened, className, onCreate, onClose }) => {
   const [data, handleFieldChange, setData] = useForm(() => ({
     ...DEFAULT_DATA,
     type: defaultType,
+    ...loadDraft(draftKey),
   }));
+
+  // Keep the unsent title so closing/reopening (or remounting) does not lose it.
+  useEffect(() => {
+    saveDraft(draftKey, data);
+  }, [draftKey, data]);
 
   const [focusNameFieldState, focusNameField] = useToggle();
   const [isClosableActiveRef, activateClosable, deactivateClosable] = useClosable();
@@ -199,6 +237,7 @@ const AddCard = React.memo(({ isOpened, className, onCreate, onClose }) => {
 AddCard.propTypes = {
   isOpened: PropTypes.bool,
   className: PropTypes.string,
+  draftKey: PropTypes.string,
   onCreate: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };
@@ -206,6 +245,7 @@ AddCard.propTypes = {
 AddCard.defaultProps = {
   isOpened: true,
   className: undefined,
+  draftKey: undefined,
 };
 
 export default AddCard;
