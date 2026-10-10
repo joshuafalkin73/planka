@@ -64,7 +64,7 @@ const GridView = React.memo(
           {canAddCard &&
             (onCardCreate && isAddCardOpened ? (
               <div className={styles.card}>
-                <AddCard onCreate={onCardCreate} onClose={handleAddCardClose} />
+                <AddCard draftKey="board-grid" onCreate={onCardCreate} onClose={handleAddCardClose} />
               </div>
             ) : (
               <div>

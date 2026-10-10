@@ -169,6 +169,7 @@ const List = React.memo(({ id, index }) => {
 
   const addCardNode = canAddCard && (
     <AddCard
+      draftKey={`list:${id}`}
       isOpened={!!addCardPosition}
       className={styles.addCard}
       onCreate={handleCardCreate}
